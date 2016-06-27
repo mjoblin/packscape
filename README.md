@@ -9,7 +9,7 @@ packscape uses [NetDumplings](https://github.com/mjoblin/netdumplings) to retrie
 
 Here's what it looks like (excuse the crazy banding; that's just the gif having trouble with all the shades of green):
 
-![packscape example](/../screenshots/sreenshots/packscape.gif?raw=true "packscape example")
+![packscape example](/../screenshots/screenshots/packscape.gif?raw=true "packscape example")
 
 ### Installation
 
