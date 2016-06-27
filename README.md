@@ -13,6 +13,8 @@ Here's what it looks like (excuse the crazy banding; that's just the gif having 
 
 ### Installation
 
+**Note**: For a snappier git clone (due to my silly-large 20MB animated gif which is just soaking up space in the screenshots branch) do a `git clone https://github.com/mjoblin/packscape.git --single-branch` to retrieve only the master branch.  Although not required, this will make the clone faster.
+
 First [install NetDumplings](https://netdumplings.readthedocs.io/en/latest/pages/installation.html) (note this requires Python 3.5, and you also need administrator privileges for the packet sniffer to function).  Once NetDumplings is installed you need to run it with the single `PacketCountChef`:
 
 ```
@@ -32,8 +34,14 @@ Now you can install and run the visualizer (a *dumpling eater* if you speak NetD
 
 ```
 $ git clone https://github.com/mjoblin/packscape.git
-$ cd packscape
 
+or (see above):
+
+$ git clone https://github.com/mjoblin/packscape.git --single-branch
+
+then:
+
+$ cd packscape
 $ npm install
 $ npm start
 $ open http://localhost:3000
