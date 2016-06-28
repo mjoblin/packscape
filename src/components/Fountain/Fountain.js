@@ -363,14 +363,9 @@ class Fountain extends React.Component {
         // Every in-flight particle needs to have its animation updated.
         this._animateParticles();
 
-        // Make new array of particles to force re-render.
-        // TODO: This doesn't feel right.
-        let foo = [];
-        for (let i = 0; i < this.particles.length; i++) {
-            foo[i] = this.particles[i];
-        }
-
         // Return the finished fountain in its current animation state.
+        // TODO: The [...this.particles] (to copy the particle array) is done
+        //  to force a re-render.  Hopefully there's a better way.
         return (
             <group position={basePosition}>
                 <mesh rotation={baseRotation} castShadow={true}>
@@ -385,7 +380,7 @@ class Fountain extends React.Component {
                 />
                 
                 <points castShadow={false}>
-                    <geometry vertices={foo} />
+                    <geometry vertices={[...this.particles]} />
                     <pointsMaterial color={this.color} size={5} />
                 </points>
             </group>
