@@ -9,6 +9,35 @@ class Ground extends React.Component {
     constructor(props, context) {
         super(props, context);
         this.state = {};
+    };
+
+    componentDidMount() {
+        this.refs.shaderMaterial.extensions.derivatives = true;
+        this.refs.shaderMaterial.uniforms = [];
+    }
+
+    getShaderMaterial() {
+        let vertexShader = `
+            attribute vec3 center;
+            varying vec3 vCenter;
+            
+            void main() {
+                vCenter = center;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+         `;
+
+        let fragmentShader = `
+            void main() {
+                gl_FragColor.r = 0.3;
+                gl_FragColor.g = 1.0;
+                gl_FragColor.b = 0.5;
+            }
+        `;
+
+        return(
+            <shaderMaterial vertexShader={vertexShader} fragmentShader={fragmentShader} ref="shaderMaterial" />
+        );
     }
 
     render() {
@@ -20,10 +49,12 @@ class Ground extends React.Component {
                     height={30}
                     radialSegments={36}
                 />
-                <meshPhongMaterial color={0x157715} />
+                {this.getShaderMaterial()}
             </mesh>
         );
     }
 }
+//{this.getShaderMaterial()}
+//<meshPhongMaterial color={0x157715} />
 
 export default Ground;

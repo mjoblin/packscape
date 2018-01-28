@@ -3,7 +3,9 @@ import React3 from 'react-three-renderer';
 import THREE from 'three';
 import Ground from '../Ground/Ground';
 import Fountain from '../Fountain/Fountain';
+import MA from 'moving-average';
 
+let AUDIO_CONTEXT = new (window.AudioContext || window.webkitAudioContext)();
 
 class Packscape extends React.Component {
     /**
@@ -17,7 +19,7 @@ class Packscape extends React.Component {
             packetCounts: {},
             frame: 0
         };
-
+        
         // Emitter that we'll receive new packet count information from.
         this.dumplingEmitter = props.dumplingEmitter;
         this.dumplingEmitter.on('PacketCountChef', this._dumplingHandler.bind(this));
@@ -32,6 +34,29 @@ class Packscape extends React.Component {
             let newFrame = this.state.frame + 1;
             this.setState({frame: newFrame});
         };
+        
+        this.audioContext = AUDIO_CONTEXT;
+        
+        let gain = this.audioContext.createGain();
+        gain.gain.value = 1;
+
+        let convolver = this.effect();
+        convolver.connect(gain);
+
+        this.oscillator = this.audioContext.createOscillator();
+        this.oscillator.type = 'sine';
+        this.oscillator.frequency.value = 220;
+        this.oscillator.detune.value = 0;
+        this.oscillator.connect(convolver);
+        this.oscillator.start(0);
+
+        gain.connect(this.audioContext.destination);
+        
+        //this.oscillator = props.oscillator;
+        //this.audioCtx = props.audioContext;
+        this.packetMA = MA(30 * 1000);     // 30 seconds
+        this.packetsReceived = 0;
+        this.packetRate = 1;
     }
     
     _dumplingHandler(dumpling) {
@@ -48,10 +73,40 @@ class Packscape extends React.Component {
         for (let layer in dumpling.packet_counts) {
             counts[layer.split('-').pop().trim()] = dumpling.packet_counts[layer];
         }
+
+        // Determine how many new packets we have.
+        let packetCount = Object.keys(counts).reduce((a, b) => a + counts[b], 0);
+        if (this.packetsReceived > 0) {
+            let newPackets = packetCount - this.packetsReceived + 1;
+            this.packetMA.push(Date.now(), newPackets);
+            this.packetRate = newPackets / this.packetMA.movingAverage();
+            let oscFreq = Math.round(220 * this.packetRate);
+            oscFreq = Math.min(Math.max(oscFreq, 110), 880);
+            this.oscillator.frequency.linearRampToValueAtTime(
+                oscFreq, this.audioContext.currentTime + 3);
+        }
+        this.packetsReceived = packetCount;
         
         this.setState({
             packetCounts: counts
         });
+    }
+
+    effect() {
+        var convolver = this.audioContext.createConvolver();
+        var noiseBuffer = this.audioContext.createBuffer(
+                2, 0.5 * this.audioContext.sampleRate, this.audioContext.sampleRate);
+        var left = noiseBuffer.getChannelData(0);
+        var right = noiseBuffer.getChannelData(1);
+        
+        for (var i = 0; i < noiseBuffer.length; i++) {
+            left[i] = Math.random() * 2 - 1;
+            right[i] = Math.random() * 2 - 1;
+        }
+        
+        convolver.buffer = noiseBuffer;
+        
+        return convolver;
     }
 
     render() {
@@ -84,6 +139,7 @@ class Packscape extends React.Component {
                     position={fountainPosition}
                     layerName={packetLayer}
                     packetCount={this.state.packetCounts[packetLayer]}
+                    audioContext={this.audioContext}
                 />
             );
         });
@@ -93,6 +149,8 @@ class Packscape extends React.Component {
             this.cameraPosition.x, this.cameraPosition.y, this.cameraPosition.z);
 
         return (
+            <div>
+                <div style={{position: 'absolute', color: '#ffffff', padding: 10}}>giggity</div>
             <React3
                 mainCamera="camera"
                 width={width}
@@ -144,8 +202,10 @@ class Packscape extends React.Component {
                     {fountains}
                 </scene>
             </React3>
+            </div>
         );
     }
 }
+
 
 export default Packscape;

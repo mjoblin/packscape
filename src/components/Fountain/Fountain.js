@@ -53,7 +53,7 @@ class Fountain extends React.Component {
         this.particleConfig = {
             packetCount: null,
             particleCount: 1000,
-            releaseDurationMS: 900,
+            releaseDurationMS: 950,
             percentThroughReleaseCycle: 0,
             prevTCPCount: 0,
             particlesToRelease: 0,
@@ -93,12 +93,22 @@ class Fountain extends React.Component {
             currentPosition: new THREE.Vector3(x, y, z),
             moveStart: null,
             moveDuration: 5000,
-        }
+        };
+        
+        this.audioContext = props.audioContext;
+        let gain = this.audioContext.createGain();
+        gain.gain.value = 0.003;
+        gain.connect(this.audioContext.destination);
+        this.audioOutput = gain;
+        
+        this.audioBuffer = false;
     }
 
     componentWillMount() {
         this.intervalID = window.setInterval(
             this._processInterval.bind(this), this.sampleFrequency);
+
+        this._getAudioData();
     }
 
     componentWillUnmount() {
@@ -183,6 +193,9 @@ class Fountain extends React.Component {
         // normal, >1 is faster than normal).
         this.packetRate = this.shortMovingAverage.movingAverage() /
                 this.longMovingAverage.movingAverage();
+        
+        // Play sound.
+        //this._playAudio();
 
         // Hack to avoid setting state during render() invocation (which React
         // doesn't like).
@@ -269,7 +282,10 @@ class Fountain extends React.Component {
                 break;
             }
         }
-        
+
+        // Play sound.
+        this._playAudio();
+
         if (config.percentThroughReleaseCycle >= 1) {
             config.releasing = false;
         }
@@ -320,6 +336,35 @@ class Fountain extends React.Component {
                 />
             </group>
         );
+    }
+
+    _getAudioData() {
+        let request = new XMLHttpRequest();
+
+        request.open('GET', './static/test.ogg', true);
+        request.responseType = 'arraybuffer';
+
+        request.onload = () => {
+            let audioData = request.response;
+
+            this.audioContext.decodeAudioData(audioData, (buffer) => {
+                this.audioBuffer = buffer;
+            },
+            function(e) { "Error decoding audio data: " + e.err });
+        };
+
+        request.send();
+    }
+    
+    _playAudio() {
+        if (!this.audioBuffer) {
+            return false;
+        }
+
+        let source = this.audioContext.createBufferSource();
+        source.buffer = this.audioBuffer;
+        source.connect(this.audioOutput);
+        source.start(0);
     }
 
     render() {

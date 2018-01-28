@@ -25,7 +25,7 @@ dumplingEmitter.setMaxListeners(100);
 // after each dumpling chef.  This will normally be "PacketCountChef" (that's
 // the only chef we care about for this).
 
-let ws = new WebSocket("ws://localhost:11348/");
+let ws = new WebSocket("ws://10.0.1.12:11348/");
 
 ws.onopen = () => {
     // Send shifty our name.  This prompts shifty to start sending us all
@@ -42,10 +42,48 @@ ws.onmessage = (event) => {
 
 
 // ---------------------------------------------------------------------------
+// Audio
+
+/*
+let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+function effect() {
+    var convolver = audioContext.createConvolver(),
+        noiseBuffer = audioContext.createBuffer(2, 0.5 * audioContext.sampleRate, audioContext.sampleRate),
+        left = noiseBuffer.getChannelData(0),
+        right = noiseBuffer.getChannelData(1);
+    for (var i = 0; i < noiseBuffer.length; i++) {
+        left[i] = Math.random() * 2 - 1;
+        right[i] = Math.random() * 2 - 1;
+    }
+    convolver.buffer = noiseBuffer;
+    return convolver;
+};
+
+let gain = audioContext.createGain();
+gain.gain.value = 1;
+
+let convolver = effect();
+convolver.connect(gain);
+
+let osc = audioContext.createOscillator();
+osc.type = 'sine';
+osc.frequency.value = 220;
+osc.detune.value = 0;
+osc.connect(convolver);
+osc.start(0);
+
+gain.connect(audioContext.destination);
+*/
+
+
+// ---------------------------------------------------------------------------
 // Render the application.
 
 let App = ReactDOM.render(
-    <Packscape dumplingEmitter={dumplingEmitter} />,
+    <Packscape
+        dumplingEmitter={dumplingEmitter}
+    />,
     document.getElementById("app")
 );
 
