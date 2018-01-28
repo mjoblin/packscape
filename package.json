@@ -1,7 +1,7 @@
 {
   "name": "packscape",
   "version": "0.0.1",
-  "description": "A happily gratuitous 3D network packet vislualization experiment",
+  "description": "A happily gratuitous 3D network packet visualization experiment",
   "scripts": {
     "start": "node server.js",
     "lint": "eslint src"
