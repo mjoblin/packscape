@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import Packscape from './components/Packscape/Packscape';
 import EventEmitter from 'events';
 
-import styles from './app.sass';
+import styles from './app.css';
 
 
 // ---------------------------------------------------------------------------

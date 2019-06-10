@@ -17,24 +17,30 @@ module.exports = {
         filename: 'bundle.js',
         publicPath: '/static/'
     },
+    mode: 'development',
     plugins: [
         new webpack.HotModuleReplacementPlugin()
     ],
     module: {
-        loaders: [
+        rules: [
             {
                 test: /\.js$/,
-                loaders: ['babel'],
+                loaders: ['babel-loader'],
+                include: path.join(__dirname, 'src')
+            },
+            {
+                test: /\.css$/,
+                loaders: ["style-loader", "css-loader"],
                 include: path.join(__dirname, 'src')
             },
             {
                 test: /\.sass$/,
-                loaders: ["style", "css", "sass?indentedSyntax=sass"],
+                loaders: ["style-loader", "css-loader", "sass-loader?indentedSyntax=sass"],
                 include: path.join(__dirname, 'src')
             },
             {
                 test: /\.json$/,
-                loaders: ["file"],
+                loaders: ["file-loader"],
                 include: path.join(__dirname, 'static')
             }
         ]
